@@ -6,8 +6,6 @@ const dishName = document.getElementById("dishName");
 const dishDesc = document.getElementById("dishDesc");
 const dishPrice = document.getElementById("dishPrice");
 const dishStage = document.getElementById("dishStage");
-const dishPrev = document.getElementById("dishPrev");
-const dishNext = document.getElementById("dishNext");
 const flowTrack = document.getElementById("flowTrack");
 const flowPrev = document.getElementById("flowPrev");
 const flowNext = document.getElementById("flowNext");
@@ -18,6 +16,7 @@ const VISIBLE_SIDE = 4; // сколько карточек видно с каж�
 let groupIndex = 0;
 let current = 0;
 let cards = [];
+let stageCards = [];
 
 function setImage(node, url) {
   node.classList.toggle("placeholder", !url);
@@ -56,6 +55,20 @@ function selectGroup(i) {
     flowTrack.appendChild(card);
     return card;
   });
+
+  // Карусель для телефона
+  stageCards.forEach((card) => card.remove());
+  stageCards = groupItems().map((item, j) => {
+    const card = document.createElement("div");
+    card.className = "stage-card";
+    setImage(card, item.img);
+    const fog = document.createElement("span");
+    fog.className = "fog";
+    card.appendChild(fog);
+    card.addEventListener("click", () => select(j));
+    dishStage.appendChild(card);
+    return card;
+  });
   select(0, true);
 }
 
@@ -90,22 +103,30 @@ function select(i, instant = false) {
     }, 250);
   }
 
-  showSides(items);
+  layoutStage();
   layoutFlow();
   flowPrev.disabled = current === 0;
   flowNext.disabled = current === items.length - 1;
 }
 
-// Соседние блюда по бокам от основного (видны только на телефоне)
-function showSides(items) {
-  [[dishPrev, items[current - 1]], [dishNext, items[current + 1]]].forEach(([node, item]) => {
-    node.classList.toggle("empty", !item);
-    if (item) setImage(node, item.img);
+// Карусель на телефоне: основное блюдо в центре, соседние заходят за него по бокам.
+// При перелистывании карточки съезжают на новые места; dragPx — сдвиг пальцем
+function layoutStage(dragPx = 0) {
+  stageCards.forEach((card, i) => {
+    const offset = i - current;
+    const dist = Math.abs(offset);
+    const pos = Math.sign(offset) * (dist === 0 ? 0 : dist === 1 ? 42 : 60);
+    const scale = dist === 0 ? 1 : dist === 1 ? 0.82 : 0.7;
+    card.style.transform = `translate(-50%, -50%) translateX(calc(${pos}% + ${dragPx}px)) scale(${scale})`;
+    card.style.zIndex = 10 - dist;
+    card.style.opacity = dist > 1 ? 0 : dist === 1 ? 0.85 : 1;
+    card.style.filter = dist ? "blur(2px) grayscale(0.4)" : "none";
+    card.style.pointerEvents = dist > 1 ? "none" : "auto";
+    card.classList.toggle("current", dist === 0);
+    card.classList.toggle("prev", offset === -1);
+    card.classList.toggle("next", offset === 1);
   });
 }
-
-dishPrev.addEventListener("click", () => select(current - 1));
-dishNext.addEventListener("click", () => select(current + 1));
 
 // Чем дальше от центра — тем сильнее карточки заходят друг на друга,
 // мельче, прозрачнее и размытее (уходят в туман)
@@ -136,15 +157,52 @@ flowNext.addEventListener("click", () => select(current + 1));
 
 // Свайп на телефоне
 let touchX = null;
-[flowTrack, dishStage].forEach((area) => {
-  area.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
-  area.addEventListener("touchend", (e) => {
-    if (touchX === null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) select(current + (dx < 0 ? 1 : -1));
-    touchX = null;
-  });
+flowTrack.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+flowTrack.addEventListener("touchend", (e) => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 40) select(current + (dx < 0 ? 1 : -1));
+  touchX = null;
 });
+
+// Карточки едут за пальцем; отпустили далеко — листаем, близко — возвращаются
+let drag = null;
+
+dishStage.addEventListener("touchstart", (e) => {
+  const t = e.touches[0];
+  drag = { x: t.clientX, y: t.clientY, dx: 0, horizontal: null };
+}, { passive: true });
+
+dishStage.addEventListener("touchmove", (e) => {
+  if (!drag) return;
+  const t = e.touches[0];
+  const dx = t.clientX - drag.x;
+  const dy = t.clientY - drag.y;
+  // Направление определяем по первым движениям: вбок — листаем, вверх-вниз — прокрутка
+  if (drag.horizontal === null && Math.abs(dx) + Math.abs(dy) > 8) {
+    drag.horizontal = Math.abs(dx) > Math.abs(dy);
+    if (drag.horizontal) dishStage.classList.add("dragging");
+  }
+  if (!drag.horizontal) return;
+  e.preventDefault();
+  const items = groupItems();
+  // У первого и последнего блюда карточки тянутся туже
+  const edge = (dx > 0 && current === 0) || (dx < 0 && current === items.length - 1);
+  drag.dx = edge ? dx * 0.3 : dx;
+  layoutStage(drag.dx);
+}, { passive: false });
+
+function endDrag() {
+  if (!drag) return;
+  const { dx, horizontal } = drag;
+  drag = null;
+  dishStage.classList.remove("dragging");
+  if (horizontal && Math.abs(dx) > 50) select(current + (dx < 0 ? 1 : -1));
+  else layoutStage();
+}
+
+dishStage.addEventListener("touchend", endDrag);
+dishStage.addEventListener("touchcancel", endDrag);
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") select(current - 1);

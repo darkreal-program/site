@@ -290,10 +290,16 @@ html:has(.menu-body),
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+/* При смене блюда плавно гаснут подписи и картинка; карусель на телефоне не гаснет, а едет */
+.dish > *,
+.dish-img {
   transition: opacity 0.3s ease;
 }
 
-.dish.fading {
+.dish.fading > :not(.dish-stage),
+.dish.fading .dish-img {
   opacity: 0;
 }
 
@@ -313,9 +319,11 @@ html:has(.menu-body),
   justify-content: center;
 }
 
-/* Соседние блюда — только на телефоне */
-.dish-side {
-  display: none;
+/* Карусель — только на телефоне */
+@media (min-width: 761px) {
+  .stage-card {
+    display: none !important;
+  }
 }
 
 .dish-name {
@@ -401,7 +409,8 @@ html:has(.menu-body),
 
 /* Вместо фото — надпись «Фото пока нет :(» */
 .flow-card.placeholder,
-.dish-img.placeholder {
+.dish-img.placeholder,
+.stage-card.placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -413,18 +422,21 @@ html:has(.menu-body),
 
 /* Первая строка: «Фото пока нет :(», под ней: «Простите» */
 .flow-card.placeholder::before,
-.dish-img.placeholder::before {
+.dish-img.placeholder::before,
+.stage-card.placeholder::before {
   content: "Фото пока нет :(";
   padding: 0 8px;
 }
 
 .flow-card.placeholder::after,
-.dish-img.placeholder::after {
+.dish-img.placeholder::after,
+.stage-card.placeholder::after {
   content: "Простите";
   font-size: 0.75em;
 }
 
-.dish-img.placeholder {
+.dish-img.placeholder,
+.stage-card.placeholder {
   font-size: 1.4rem;
 }
 
@@ -732,58 +744,56 @@ html:has(.menu-body),
     touch-action: pan-y;
   }
 
+  /* Обычная картинка только держит место под карусель */
   .dish-img {
-    position: relative;
-    z-index: 2;
+    visibility: hidden;
     width: 72%;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
   }
 
-  .dish-side {
+  .stage-card {
     display: block;
     position: absolute;
     top: 50%;
     left: 50%;
-    z-index: 1;
     width: 72%;
     aspect-ratio: 4 / 3;
     border-radius: 20px;
     background-color: #eee;
     background-size: cover;
     background-position: center;
-    opacity: 0.85;
-    filter: blur(2px) grayscale(0.4);
     cursor: pointer;
-    transition: opacity 0.3s ease;
+    transition: transform 0.45s ease, opacity 0.45s ease, filter 0.45s ease, box-shadow 0.45s ease;
+  }
+
+  .stage-card.current {
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+    cursor: default;
   }
 
   /* Туман поверх соседних карточек */
-  .dish-side::after {
-    content: "";
+  .stage-card .fog {
     position: absolute;
     inset: 0;
     border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
   }
 
-  .dish-side-prev {
-    transform: translate(-50%, -50%) translateX(-42%) scale(0.82);
-  }
-
-  .dish-side-prev::after {
+  .stage-card.prev .fog {
+    opacity: 1;
     background: linear-gradient(to right, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.15) 70%);
   }
 
-  .dish-side-next {
-    transform: translate(-50%, -50%) translateX(42%) scale(0.82);
-  }
-
-  .dish-side-next::after {
+  .stage-card.next .fog {
+    opacity: 1;
     background: linear-gradient(to left, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.15) 70%);
   }
 
-  .dish-side.empty {
-    opacity: 0;
-    pointer-events: none;
+  /* Пока палец тянет карточки — без задержки */
+  .dish-stage.dragging .stage-card,
+  .dish-stage.dragging .fog {
+    transition: none;
   }
 
   /* На телефоне: «Меню» слева, «Позвонить» справа, чтобы не наезжать на название */
