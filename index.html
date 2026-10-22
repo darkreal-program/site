@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>Рюмочная на Патриарших</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Фото закреплены, белый фон наезжает на них при прокрутке -->
+  <div class="hero">
+    <div class="slides" id="slides"></div>
+    <div class="overlay"></div>
+  </div>
+
+  <div class="topbar" id="topbar"></div>
+
+  <!-- Кнопки сверху: «Меню» слева от «Позвонить» -->
+  <div class="top-actions">
+    <a class="call-btn" id="menuBtn" href="menu.html" aria-label="Меню">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="4" y1="7" x2="20" y2="7"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="17" x2="20" y2="17"/>
+      </svg>
+      <span>Меню</span>
+    </a>
+
+    <a class="call-btn" id="callBtn" href="tel:+79776101289" aria-label="Позвонить: +7 977 610 12 89">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>
+      </svg>
+      <span>Позвонить</span>
+    </a>
+  </div>
+
+  <div class="title" id="title">
+    <h1 class="title-main" id="titleMain">Рюмочная на Патриарших</h1>
+    <p class="subtitle" id="subtitle">Ждём вас каждый день с 12:00 до 00:00</p>
+  </div>
+
+  <main class="content" id="content">
+    <h2 class="section-title promos-title" id="promos">Акции</h2>
+
+    <section class="promos">
+      <article class="promo reveal zoom-in">
+        <img class="promo-img reveal from-left" style="--delay: 0.25s" src="https://avatars.mds.yandex.net/get-sprav-posts/19677858/2a0000019d49b3204f9d00ec639901bd0e2a/XL" alt="Скидка 20% по будням" loading="lazy">
+        <div class="promo-body reveal fade-up" style="--delay: 0.45s">
+          <h3 class="promo-title">По будням скидка 20% на всё меню, кроме напитков</h3>
+          <p class="promo-text">Скидка 20% на всё меню? Да, вы не ослышались! По будням в рюмочной действует скидка 20% на всё меню, кроме напитков. Ждём вас по адресу: ул. Октябрьской Революции, 249.</p>
+          <p class="promo-dates">с 01.04.2026 по 01.04.2027</p>
+        </div>
+      </article>
+    </section>
+
+    <h2 class="section-title reveal from-left" id="about">О нас</h2>
+
+    <section class="info">
+      <!-- Часы работы -->
+      <div class="info-item reveal from-left" style="--delay: 0.1s">
+        <svg class="icon" viewBox="0 0 120 120" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="60" cy="60" r="44"/>
+          <circle cx="60" cy="60" r="38" stroke-width="1.5"/>
+          <line x1="60" y1="26" x2="60" y2="32"/>
+          <line x1="60" y1="88" x2="60" y2="94"/>
+          <line x1="26" y1="60" x2="32" y2="60"/>
+          <line x1="88" y1="60" x2="94" y2="60"/>
+          <line x1="60" y1="60" x2="60" y2="36"/>
+          <line x1="60" y1="60" x2="78" y2="70"/>
+          <circle cx="60" cy="60" r="3" fill="#111"/>
+        </svg>
+        <p class="info-label">Каждый день</p>
+        <p class="info-value">ждём вас<br>с 12:00 до 00:00</p>
+      </div>
+
+      <div class="divider reveal grow" style="--delay: 0.3s" aria-hidden="true"></div>
+
+      <!-- Адрес -->
+      <div class="info-item reveal from-left" style="--delay: 0.4s">
+        <svg class="icon" viewBox="0 0 120 120" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <!-- сложенная карта -->
+          <path d="M14 30 L42 20 L78 32 L106 22 L106 92 L78 102 L42 90 L14 100 Z"/>
+          <line x1="42" y1="20" x2="42" y2="90" stroke-width="1.5"/>
+          <line x1="78" y1="32" x2="78" y2="102" stroke-width="1.5"/>
+          <!-- маршрут -->
+          <path d="M26 86 C 40 80, 34 64, 50 62 S 66 70, 74 56" stroke-dasharray="4 6" stroke-width="2.5"/>
+          <circle cx="26" cy="86" r="3.5" fill="#111"/>
+          <!-- точка назначения -->
+          <path d="M82 58 C 82 58, 70 44, 70 36 A 12 12 0 0 1 94 36 C 94 44, 82 58, 82 58 Z" fill="#fff"/>
+          <circle cx="82" cy="36" r="4" fill="#111"/>
+        </svg>
+        <p class="info-label">Мы находимся на</p>
+        <a class="info-value info-link" href="https://yandex.ru/maps/?ll=38.828043%2C55.172149&amp;mode=routes&amp;rtext=~55.097093%2C38.763149&amp;rtt=auto&amp;ruri=~ymapsbm1%3A%2F%2Forg%3Foid%3D4404500525&amp;z=11.4" target="_blank" rel="noopener">ул. Октябрьской Революции, 249, Коломна</a>
+      </div>
+
+      <div class="divider reveal grow" style="--delay: 0.6s" aria-hidden="true"></div>
+
+      <!-- Рейтинг -->
+      <div class="info-item reveal from-left" style="--delay: 0.7s">
+        <svg class="icon" viewBox="0 0 120 120" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <!-- ленты -->
+          <path d="M44 14 L58 50"/>
+          <path d="M76 14 L62 50"/>
+          <path d="M44 14 L56 14 L66 38"/>
+          <path d="M76 14 L64 14 L60 24" stroke-width="1.5"/>
+          <!-- медаль -->
+          <circle cx="60" cy="76" r="30"/>
+          <circle cx="60" cy="76" r="23" stroke-width="1.5"/>
+          <!-- звезда -->
+          <path d="M60 62 L64.1 70.4 L73.3 71.7 L66.6 78.2 L68.2 87.3 L60 83 L51.8 87.3 L53.4 78.2 L46.7 71.7 L55.9 70.4 Z" fill="#111"/>
+        </svg>
+        <p class="info-label">Имеем рейтинг</p>
+        <p class="info-value info-rating">5.0</p>
+      </div>
+    </section>
+
+    <!-- Вторая кнопка меню — после «О нас» -->
+    <div class="menu-cta">
+      <a class="menu-cta-btn" href="menu.html">Открыть меню</a>
+    </div>
+
+    <!-- Серая полоса внизу страницы -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <p class="footer-title reveal fade-up">Рюмочная на Патриарших</p>
+        <div class="footer-info">
+          <a class="reveal fade-up" style="--delay: 0.15s" href="tel:+79776101289">+7 977 610 12 89</a>
+          <span class="reveal fade-up" style="--delay: 0.3s">Каждый день с 12:00 до 00:00</span>
+          <span class="reveal fade-up" style="--delay: 0.45s">ул. Октябрьской Революции, 249, Коломна</span>
+        </div>
+        <p class="footer-copy reveal fade-up" style="--delay: 0.6s">© 2026 Рюмочная на Патриарших</p>
+      </div>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

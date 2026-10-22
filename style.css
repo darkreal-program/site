@@ -1,0 +1,805 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #fff;
+  color: #111;
+  font-family: "Playfair Display", Georgia, serif;
+}
+
+/* Титульный блок на 3/4 экрана, закреплён на месте */
+.hero {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 90vh;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.slides {
+  position: absolute;
+  inset: 0;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  /* лёгкое размытие; scale убирает светлые края от blur */
+  filter: blur(4px);
+  transform: scale(1.08);
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+/* Затемнение, чтобы текст хорошо читался */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Белая полоса под названием, когда белый фон доехал до верха */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.topbar.visible {
+  opacity: 1;
+}
+
+/* Название: двигается вверх и уменьшается через JS */
+.title {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 0 16px;
+  text-align: center;
+  color: #f5f0e8;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  transform-origin: center top;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
+  will-change: transform;
+  z-index: 3;
+}
+
+.title.dark {
+  color: #111;
+  text-shadow: none;
+}
+
+.title-main {
+  font-size: clamp(2.2rem, 6vw, 5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+}
+
+/* Подзаголовок под названием, исчезает при прокрутке */
+.subtitle {
+  margin-top: 16px;
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+/* Белый фон, который наезжает на фотографии */
+.content {
+  position: relative;
+  z-index: 1;
+  margin-top: 90vh;
+  /* не меньше экрана, чтобы фото успевали полностью уехать; полоса — в самом низу */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+/* В колонке блоки с max-width + margin: auto иначе сжались бы по содержимому */
+.content > * {
+  width: 100%;
+}
+
+/* Серая полоса внизу */
+.footer {
+  margin-top: auto;
+  background: #3a3a3a;
+  color: #f5f0e8;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 24px 40px;
+  text-align: center;
+}
+
+.footer-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.footer-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 32px;
+  font-size: 1.05rem;
+  color: #ddd;
+}
+
+.footer-info a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  /* transition задаёт .reveal (включая border-color для подчёркивания) */
+}
+
+.footer-info a:hover {
+  border-bottom-color: #ddd;
+}
+
+.footer-copy {
+  margin-top: 32px;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+/* Кнопки сверху справа: «Меню» и «Позвонить» */
+.top-actions {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+  display: flex;
+  gap: 10px;
+}
+
+.call-btn {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 2px solid #f5f0e8;
+  border-radius: 999px;
+  color: #f5f0e8;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.15);
+  transition: color 0.4s ease, border-color 0.4s ease, background 0.25s ease;
+}
+
+.call-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.call-btn:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.call-btn.dark {
+  color: #111;
+  border-color: #111;
+  background: #fff;
+}
+
+.call-btn.dark:hover {
+  background: #111;
+  color: #fff;
+}
+
+/* ---------- Страница меню ---------- */
+html:has(.menu-body),
+.menu-body {
+  overflow-x: hidden;
+}
+
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+.page-header .call-btn {
+  animation: none;
+}
+
+.page-header-title {
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  font-weight: 700;
+  color: #111;
+  text-decoration: none;
+  text-align: center;
+}
+
+.menu-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 40px 64px;
+  animation: fadeUp 0.6s ease-out backwards;
+}
+
+.menu-heading {
+  text-align: center;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  margin-bottom: 24px;
+}
+
+.menu-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.menu-tab {
+  padding: 8px 16px;
+  border: 2px solid #111;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.menu-tab:hover,
+.menu-tab.active {
+  background: #111;
+  color: #fff;
+}
+
+/* Выбранное блюдо сверху */
+.dish {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: opacity 0.3s ease;
+}
+
+.dish.fading {
+  opacity: 0;
+}
+
+.dish-img {
+  width: min(460px, 100%);
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+  background-color: #f2f2f2;
+  background-size: cover;
+  background-position: center;
+}
+
+.dish-stage {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Соседние блюда — только на телефоне */
+.dish-side {
+  display: none;
+}
+
+.dish-name {
+  margin-top: 20px;
+  font-size: 1.7rem;
+  line-height: 1.2;
+}
+
+/* Пометка «(блюдо от шефа)» всегда на второй строке */
+.dish-note {
+  display: block;
+  white-space: nowrap;
+}
+
+.dish-desc {
+  margin-top: 8px;
+  max-width: 560px;
+  min-height: 1.5em;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666;
+}
+
+.dish-price {
+  margin-top: 8px;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* Лента блюд с «туманом» по краям */
+.flow {
+  position: relative;
+  margin-top: 28px;
+  height: 170px;
+}
+
+.flow-track {
+  position: absolute;
+  inset: 0;
+}
+
+.flow::before,
+.flow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 22%;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.flow::before {
+  left: 0;
+  background: linear-gradient(to right, #fff 15%, rgba(255, 255, 255, 0));
+}
+
+.flow::after {
+  right: 0;
+  background: linear-gradient(to left, #fff 15%, rgba(255, 255, 255, 0));
+}
+
+.flow-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 190px;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  background-color: #eee;
+  background-size: cover;
+  background-position: center;
+  border: 3px solid #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.5s ease, opacity 0.5s ease, filter 0.5s ease;
+}
+
+.flow-card.current {
+  border-color: #111;
+  cursor: default;
+}
+
+/* Вместо фото — надпись «Фото пока нет :(» */
+.flow-card.placeholder,
+.dish-img.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  text-align: center;
+  color: #999;
+}
+
+/* Первая строка: «Фото пока нет :(», под ней: «Простите» */
+.flow-card.placeholder::before,
+.dish-img.placeholder::before {
+  content: "Фото пока нет :(";
+  padding: 0 8px;
+}
+
+.flow-card.placeholder::after,
+.dish-img.placeholder::after {
+  content: "Простите";
+  font-size: 0.75em;
+}
+
+.dish-img.placeholder {
+  font-size: 1.4rem;
+}
+
+.flow-card.placeholder {
+  font-size: 0.85rem;
+}
+
+.flow-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 300;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #111;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.flow-arrow svg {
+  width: 22px;
+  height: 22px;
+}
+
+.flow-arrow:hover:not(:disabled) {
+  background: #111;
+  color: #fff;
+}
+
+.flow-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.flow-prev { left: 0; }
+.flow-next { right: 0; }
+
+/* Кнопка «Открыть меню» после «О нас» */
+.menu-cta {
+  display: flex;
+  justify-content: center;
+  padding: 0 16px 100px;
+}
+
+.menu-cta-btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 16px 40px;
+  border: 2px solid #111;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.menu-cta-btn:hover {
+  background: #fff;
+  color: #111;
+}
+
+/* Акции */
+.promos {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.promo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  border: 2px solid #111;
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.promo-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 16px;
+  display: block;
+}
+
+.promo-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+
+.promo-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.promo-dates {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+/* Заголовок «О нас» */
+.section-title {
+  padding: 60px 16px 56px;
+  text-align: center;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #111;
+}
+
+/* «Акции» — целиком видно в нижних 10% экрана сразу при заходе */
+.promos-title {
+  padding: 1.5vh 16px 48px;
+  font-size: clamp(1.8rem, 5vh, 3rem);
+  line-height: 1.2;
+}
+
+/* ---------- Анимация появления при загрузке ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* backwards — чтобы после анимации управление снова было у скрипта прокрутки */
+.slides       { animation: fadeIn 1.8s ease-out backwards; }
+.title-main   { animation: fadeUp 1.2s ease-out 0.5s backwards; }
+.subtitle     { animation: fadeUp 1.2s ease-out 0.9s backwards; }
+.call-btn     { animation: fadeIn 1s ease-out 1.2s backwards; }
+.promos-title { animation: fadeUp 1.2s ease-out 1.3s backwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slides, .title-main, .subtitle, .call-btn, .promos-title {
+    animation: none;
+  }
+}
+
+/* ---------- Анимации при прокрутке ---------- */
+/* Элемент с .reveal появляется, когда доезжает до экрана (класс .visible ставит script.js) */
+.reveal {
+  opacity: 0;
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.25s ease;
+  transition-delay: var(--delay, 0s);
+}
+
+.reveal.from-left { transform: translateX(-70px); }
+.reveal.fade-up   { transform: translateY(24px); }
+.reveal.zoom-in   { transform: translateY(40px) scale(0.95); }
+.reveal.grow      { transform: scale(0); }
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Три блока с информацией */
+.info {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.icon {
+  width: 110px;
+  height: 110px;
+  margin-bottom: 28px;
+}
+
+.info-label {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.info-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111;
+  max-width: 300px;
+}
+
+.info-rating {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.info-link {
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.25s ease;
+}
+
+.info-link:hover {
+  border-bottom-color: #111;
+}
+
+/* Разделительная линия с закруглёнными краями */
+.divider {
+  width: 4px;
+  align-self: stretch;
+  background: #111;
+  border-radius: 999px;
+}
+
+@media (max-width: 760px) {
+  .info {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    padding: 0 16px 60px;
+  }
+
+  .section-title {
+    padding: 48px 16px 40px;
+  }
+
+  .promos-title {
+    padding: 1.5vh 16px 32px;
+  }
+
+  .promos {
+    padding: 0 16px;
+  }
+
+  .promo {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 16px;
+  }
+
+  /* На телефоне — только иконка, чтобы не наезжать на название */
+  .call-btn {
+    padding: 10px;
+  }
+
+  .call-btn span {
+    display: none;
+  }
+
+  .menu-page {
+    padding: 24px 16px 48px;
+  }
+
+  .page-header-title {
+    display: none;
+  }
+
+  .dish-name {
+    font-size: 1.35rem;
+  }
+
+  /* На телефоне нижней ленты нет: листаются три карточки сверху */
+  .flow {
+    display: none;
+  }
+
+  /* Боковые карточки обрезаются по краю, чтобы страница не становилась шире экрана */
+  .dish-stage {
+    overflow: hidden;
+    margin: -24px -16px 0;
+    padding: 24px 0 32px;
+    width: calc(100% + 32px);
+    touch-action: pan-y;
+  }
+
+  .dish-img {
+    position: relative;
+    z-index: 2;
+    width: 72%;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+  }
+
+  .dish-side {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    width: 72%;
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+    background-color: #eee;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.85;
+    filter: blur(2px) grayscale(0.4);
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Туман поверх соседних карточек */
+  .dish-side::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .dish-side-prev {
+    transform: translate(-50%, -50%) translateX(-42%) scale(0.82);
+  }
+
+  .dish-side-prev::after {
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.15) 70%);
+  }
+
+  .dish-side-next {
+    transform: translate(-50%, -50%) translateX(42%) scale(0.82);
+  }
+
+  .dish-side-next::after {
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.15) 70%);
+  }
+
+  .dish-side.empty {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* На телефоне: «Меню» слева, «Позвонить» справа, чтобы не наезжать на название */
+  .top-actions {
+    left: 16px;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .top-actions > * {
+    pointer-events: auto;
+  }
+
+  .divider {
+    width: 60%;
+    height: 4px;
+    justify-self: center;
+  }
+}
